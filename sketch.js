@@ -22,7 +22,7 @@ function draw() {
   background(220);
 }
 
-function submit(){
+function submitScore(){
   var playerName = document.getElementById("playerName").value;
   var playerScore = document.getElementById("playerScore").value;
 
