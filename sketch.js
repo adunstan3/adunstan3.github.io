@@ -19,23 +19,31 @@ function setup() {
   // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
 
+  //establish a reference to top scores
   database= firebase.database();
+  var ref = database.ref("scores");
 
-  var ref = database.ref("scores").orderByValue();
-  ref.on('value', gotData, errData);
+  //Set up a listener to score updating
+  ref.orderByChild("score").on('value', gotData, errData);
 }
 
 function gotData(data){
-  var scores = data.val();
-  var keys = Object.keys(scores);
-
+  //clear curent list
   document.getElementById("topScores").innerHTML = "";
 
-  for(var i = 0; i < keys.length; i++){
-    var k = keys[i];
-    var name = scores[k].name;
-    var score = scores[k].score;
-    // console.log(name, score);
+  //get player data and reverse the order
+  var topPlayerList = [];
+  data.forEach(function(child){
+    topPlayerList.unshift(child.val());
+  })
+
+  //Make a list element for each to player
+  var player;
+  for (player of topPlayerList) {
+    name = player.name;
+    score = player.score;
+    console.log(name, score);
+
     var li = createElement('li', name+": "+score);
     li.parent('topScores');
   }
@@ -76,7 +84,7 @@ function submitScore(){
 
   var data = {
     name: playerName,
-    score: playerScore
+    score: parseInt(playerScore)
   }
 
   ref.push(data);
