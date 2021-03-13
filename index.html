@@ -1,10 +1,34 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.3.0/firebase-app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.2.0/p5.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.2.0/addons/p5.sound.min.js"></script> -->
+
     <meta charset="utf-8">
     <title>Firebase Demo</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
   </head>
   <body>
-    <h1>Hello! This is my firebase demo</h1>
+    <div class="content">
+      <script src="sketch.js"></script>
+
+      <h1>Hello! This is my firebase demo</h1>
+      <br>
+
+      <p>Here are the current top 10 scores:</p>
+      <br><br>
+      <p>Add your own score!</p>
+      <form>
+        <label for="playerName">Name:</label>
+        <input type="text" id="playerName" name="playerName">
+        <label for="playerScore">Score:</label>
+        <input type="text" id="playerScore" name="playerScore"><br><br>
+        <input type="submit" value="Submit">
+      </form>
+      <br><br>
+    </div>
+
   </body>
 </html>
