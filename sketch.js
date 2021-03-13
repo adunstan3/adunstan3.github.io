@@ -1,4 +1,8 @@
 var database;
+var squareX = 10, squareY = 20;
+var squareXvel = -2.2, squareYVel = 1.2;
+var squareSize = 100;
+
 
 function setup() {
   createCanvas(400, 400);
@@ -16,10 +20,49 @@ function setup() {
   firebase.initializeApp(firebaseConfig);
 
   database= firebase.database();
+
+  var ref = database.ref("scores").orderByValue();
+  ref.on('value', gotData, errData);
+}
+
+function gotData(data){
+  var scores = data.val();
+  var keys = Object.keys(scores);
+
+  document.getElementById("topScores").innerHTML = "";
+
+  for(var i = 0; i < keys.length; i++){
+    var k = keys[i];
+    var name = scores[k].name;
+    var score = scores[k].score;
+    // console.log(name, score);
+    var li = createElement('li', name+": "+score);
+    li.parent('topScores');
+  }
+}
+
+function errData(err){
+  console.log("Data error");
+  console.log(err);
 }
 
 function draw() {
   background(220);
+
+  squareX += squareXvel;
+  squareY += squareYVel;
+
+  if(squareX <= 0  || squareX >= width - squareSize){
+    squareXvel = - squareXvel;
+  }
+
+  if(squareY <= 0 || squareY >= height - squareSize){
+    squareYVel = -squareYVel;
+  }
+
+  fill('red');
+  noStroke();
+  square(squareX, squareY, squareSize);
 }
 
 function submitScore(){

@@ -17,10 +17,13 @@
     <div class="content">
       <script src="sketch.js"></script>
 
-      <h1>Hello! This is my firebase demo</h1>
+      <h1>Hello! This is my firebase and p5 demo</h1>
       <br>
 
-      <p>Here are the current top 10 scores:</p>
+      <h3>Here are the current top 5 scores:</h3>
+      <ol id = "topScores">
+
+      </ol>
       <br><br>
       <p>Add your own score!</p>
 
@@ -28,9 +31,10 @@
       <input type="text" id="playerName" name="playerName">
       <label for="playerScore">Score:</label>
       <input type="text" id="playerScore" name="playerScore"><br><br>
-      <button type="button" name="submitButton" onclick="submitScore">Submit</button>
+      <button type="button" name="submitButton" onclick="submitScore()">Submit</button>
 
       <br><br>
+      <h3>Insert Game Below</h3>
     </div>
 
   </body>

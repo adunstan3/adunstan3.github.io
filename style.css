@@ -10,3 +10,7 @@ canvas {
 .content {
   text-align: center
 }
+
+#topScores{
+  list-style-position: inside;
+}
