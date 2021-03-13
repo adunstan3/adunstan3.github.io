@@ -1,4 +1,4 @@
-
+var database;
 
 function setup() {
   createCanvas(400, 400);
@@ -14,8 +14,29 @@ function setup() {
   };
   // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
+
+  database= firebase.database();
 }
 
 function draw() {
   background(220);
+}
+
+function submit(){
+  var playerName = document.getElementById("playerName").value;
+  var playerScore = document.getElementById("playerScore").value;
+
+  document.getElementById("playerName").value = "";
+  document.getElementById("playerScore").value = "";
+
+  var ref = database.ref("scores");
+
+  var data = {
+    name: playerName,
+    score: playerScore
+  }
+
+  ref.push(data);
+
+  console.log("Player name: "+playerName+", Player score: "+playerScore);
 }

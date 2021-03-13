@@ -3,6 +3,9 @@
   <head>
     <!-- The core Firebase JS SDK is always required and must be listed first -->
     <script src="https://www.gstatic.com/firebasejs/8.3.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.3.0/firebase-database.js"></script>
+
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.2.0/p5.js"></script>
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.2.0/addons/p5.sound.min.js"></script> -->
 
@@ -20,13 +23,13 @@
       <p>Here are the current top 10 scores:</p>
       <br><br>
       <p>Add your own score!</p>
-      <form>
-        <label for="playerName">Name:</label>
-        <input type="text" id="playerName" name="playerName">
-        <label for="playerScore">Score:</label>
-        <input type="text" id="playerScore" name="playerScore"><br><br>
-        <input type="submit" value="Submit">
-      </form>
+
+      <label for="playerName">Name:</label>
+      <input type="text" id="playerName" name="playerName">
+      <label for="playerScore">Score:</label>
+      <input type="text" id="playerScore" name="playerScore"><br><br>
+      <button type="button" name="submitButton" onclick="submit()">Submit</button>
+
       <br><br>
     </div>
 
