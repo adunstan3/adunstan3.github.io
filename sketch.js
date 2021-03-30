@@ -26,7 +26,7 @@ function setup() {
   firebase.initializeApp(firebaseConfig);
 
   //establish a reference to top scores
-  database= firebase.database();
+  database = firebase.database();
   var ref = database.ref("scores");
 
   //Set up a listener to score updating
