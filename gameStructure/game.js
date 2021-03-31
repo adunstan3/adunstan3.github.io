@@ -3,7 +3,7 @@ let gameHandler;
 class Game {
     constructor() {
         //For frame navigation
-        this.gameMode = "gameOver";
+        this.gameMode = "menu";
         this.previousMode = "menu";
         this.setupNeeded = true;
 
