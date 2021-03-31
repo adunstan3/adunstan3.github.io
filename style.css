@@ -2,14 +2,103 @@ html, body {
   margin: 0;
   padding: 0;
 }
-canvas {
+#sketch {
   display: block;
   margin: auto;
+  position: relative;
 }
 
-.content {
-  text-align: center
+.myButton, .submitButton{
+  background-color: rgb(196, 196, 196);
+  border-radius: 35px;
+  width: 203px;
+  height: 64px;
+  font-size: 36px;
+  font-weight: bold;
+  border: none;
 }
+
+.submitButton{
+  border-radius: 15px;
+  width: 100px;
+  height: 36px;
+  font-size: 18px;
+  outline: none;
+}
+
+
+/*
+The pause icon styling is copied pretty much directly from here
+https://css-tricks.com/making-pure-css-playpause-button/
+*/
+.pauseIcon{
+  box-sizing: border-box;
+  width: 74px;
+  height: 33px;
+  border-color: transparent transparent transparent rgb(87, 155, 139);
+  background-color: transparent;
+  border-style: double;
+  border-width: 0px 30px 0px 30px;
+}
+
+.pauseIcon:hover{
+  border-color: transparent transparent transparent rgb(99, 236, 203);
+}
+
+.myButton:hover,.submitButton:hover {
+  background-color: rgb(176, 141, 139);
+  border-style: solid;
+  border-width: 2px;
+}
+
+.pauseButton:hover, .submitButton:hover{
+  border-color: black;
+}
+
+.submitButton:active{
+  border-color: white;
+}
+
+.submitButton:disabled, .nameInput:disabled{
+  background-color: rgb(170, 170, 170);
+}
+
+.submitButton:hover:disabled{
+  border-color: transparent;
+}
+
+
+.menuButton:hover, .helpButton:hover{
+  border-color: white;
+}
+.content {
+
+}
+
+.helpText{
+  font-size: 21px;
+  color: white;
+  width: 500px;
+}
+
+.nameInput{
+  width: 145px;
+  height: 35px;
+  outline: none;
+  background-color: rgb(181, 224, 219);
+  border: none;
+  font-size: 15px;
+  border-radius: 7px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: transparent;
+  text-align: center;
+}
+
+.nameInput:focus{
+  border-color: black;
+}
+
 
 #topScores{
   list-style-position: inside;

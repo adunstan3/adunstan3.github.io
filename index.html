@@ -5,29 +5,28 @@
     <script src="https://www.gstatic.com/firebasejs/8.3.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.3.0/firebase-database.js"></script>
 
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.2.0/p5.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.2.0/addons/p5.sound.min.js"></script> -->
+
     <meta charset="utf-8">
     <title>Firebase Demo</title>
     <link rel="stylesheet" type="text/css" href="style.css">
   </head>
   <body>
     <div class="content">
-      <script src="sketch.js"></script>
+      <script src="gameStructure/gameObject.js"></script>
+      <script src="gameObjects/UI.js"></script>
+      <script src="gameObjects/player.js"></script>
+      <script src="gameObjects/enemy.js"></script>
+      <script src="gameObjects/bullet.js"></script>
+      <script src="gameStructure/game.js"></script>
 
-      <h1>Hello! This is my firebase and p5 demo</h1>
-      <br>
-
-      <h3>Here are the current top 5 scores:</h3>
-      <ol id = "topScores">
-
-      </ol>
+      <script src="gameStructure/levels.js"></script>
+      <script src="gameStructure/main.js"></script>
+      <script src="gameStructure/databaseHandler.js"></script>
       <br><br>
-      <p>Add your own score!</p>
-
-      <label for="playerName">Name:</label>
-      <input type="text" id="playerName" name="playerName">
-      <label for="playerScore">Score:</label>
-      <input type="text" id="playerScore" name="playerScore"><br><br>
-      <button type="button" name="submitButton" onclick="submitScore()">Submit</button>
+      <div id="sketch"> </div>
     </div>
 
   </body>
