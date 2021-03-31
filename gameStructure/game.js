@@ -3,7 +3,7 @@ let gameHandler;
 class Game {
     constructor() {
         //For frame navigation
-        this.gameMode = "menu";
+        this.gameMode = "gameOver";
         this.previousMode = "menu";
         this.setupNeeded = true;
 
@@ -123,7 +123,9 @@ class Game {
 
         let helpText = createP(this.helpString);
         helpText.addClass("helpText");
+        helpText.parent("sketch");
         helpText.position(51, 140);
+
 
       }else if(this.gameMode == "menu"){
         //restart the game
@@ -177,10 +179,11 @@ class Game {
 
         //Create text box
         let inp = createInput();
-        inp.position(166, 314);
+        inp.position(166, 278);
         inp.addClass("nameInput");
         inp.elt.placeholder = "Leaderboard Name";
         inp.attribute('maxlength', '15');
+        inp.parent("sketch");
 
         //Create the submit button
         var pauseButton = createButton("Submit");

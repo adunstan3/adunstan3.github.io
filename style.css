@@ -1,6 +1,8 @@
 html, body {
   margin: 0;
   padding: 0;
+  background-color: rgb(195, 247, 212);
+  background-color: rgb(252, 239, 194);
 }
 #sketch {
   display: block;
@@ -72,7 +74,8 @@ https://css-tricks.com/making-pure-css-playpause-button/
   border-color: white;
 }
 .content {
-
+  margin: auto;
+  width: 600px;
 }
 
 .helpText{
