@@ -23,11 +23,28 @@ class Bullet extends GameObject {
         square(this.squareX, this.squareY, this.squareSize);
     }
     outOfScreen() {
-        if (this.squareY < 0){
+        if (this.squareY < 0 || this.squareY > 600){
             return true;
         }
     }
     getLocation() {
         return this.squareY;
     }
+
+    getLeftX() {
+        return this.squareX;
+    }
+
+    getRightX() {
+        return this.squareX + this.squareSize;
+    }
+
+    getTopY() {
+        return this.squareY;
+    }
+
+    getBottomY() {
+        return this.squareY + this.squareSize;
+    }
+
 }

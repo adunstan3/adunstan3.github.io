@@ -10,9 +10,9 @@ class Player extends GameObject {
         // Need player lives count
         this.lives = 3;
         this.shipSize = 40;
-        this.triangle1X = 200; this.triangle1Y = 340+200; this.triangle2X= 190 ; this.triangle2Y = 360+200;
-        this.triangle3X = 210; this.triangle3Y = 360+200;
-        this.speed = 5;
+        this.triangle1X = 300; this.triangle1Y = 510; this.triangle2X= 290 ; this.triangle2Y = 530;
+        this.triangle3X = 210; this.triangle3Y = 530;
+        this.speed = 2.5;
 
         //How close the player can get to the edge
         this.edgeBuffer = 15;
@@ -51,6 +51,22 @@ class Player extends GameObject {
             this.triangle3X -= this.speed;
         }
 
+        //allows you to fire weapon while space bar is down
+        if (keyIsDown(32)) {
+            //make sure we are able to fire
+            this.fireable = true;
+            for (const tempObject of gameHandler.find('bullet')) {
+                if (tempObject.getLocation() > 320) {
+                    this.fireable = false;
+                }
+            }
+
+            //once we know we can fire WE FIRE
+            if (this.fireable == true) {
+                gameHandler.addObject(new Bullet('bullet', 20, gameHandler.find('player')[0].getGun()[0], gameHandler.find('player')[0].getGun()[1]));
+            }
+        }
+
     }
 
     draw() {
@@ -58,14 +74,34 @@ class Player extends GameObject {
         //draw the player
         fill('green');
         noStroke();
-        image(playerImage, this.triangle1X, this.triangle1Y, this.shipSize, this.shipSize);
+        image(playerImage, this.triangle1X - 20, this.triangle1Y, this.shipSize, this.shipSize);
         //triangle(this.triangle1X, this.triangle1Y, this.triangle2X, this.triangle2Y, this.triangle3X, this.triangle3Y);
     }
 
     getGun(){
         this.coordinate = [];
-        this.coordinate.push(this.triangle1X);
+        this.coordinate.push(this.triangle1X - 3);
         this.coordinate.push(this.triangle1Y);
         return this.coordinate;
+    }
+
+    getLeftVertex() {
+        return this.triangle2X;
+    }
+
+    getRightVertex() {
+        return this.triangle3X;
+    }
+
+    getTopY() {
+        return this.triangle1Y;
+    }
+
+    getBottomY() {
+        return this.triangle2Y;
+    }
+
+    reduceLife() {
+        this.lives -= 1;
     }
 }

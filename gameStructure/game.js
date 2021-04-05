@@ -51,7 +51,52 @@ class Game {
         }
 
         gameHandler.addObject(new Player("player", playerDrawOrder));
-        gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'blue'));
+
+        //creating first row of blue enemies
+        let homeY = 200;
+        let startX = 620;
+        let startY = 620;
+        for(var i = 1; i <= 10; i++){
+            let homeX = i * 40 + 75;
+            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'blue', homeX, homeY, startX += 20, startY += 20));
+        }
+
+        //creating second row of blue enemies
+        homeY = 240;
+        startX = -200;
+        startY = 820;
+        for(var i = 1; i <= 10; i++){
+            let homeX = i * 40 + 75;
+            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'blue', homeX, homeY, startX += 20, startY -= 20));
+        }
+
+        //creating first row of red enemies
+        homeY = 160;
+        startX = -160;
+        startY = -160;
+        for(var i = 1; i <= 8; i++){
+            let homeX = i * 40 + 115;
+            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'red', homeX, homeY, startX += 20, startY += 20));
+        }
+
+        //creating second row of red enemies
+        homeY = 120;
+        startX = 620;
+        startY = -20;
+        for(var i = 1; i <= 8; i++){
+            let homeX = i * 40 + 115;
+            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'red', homeX, homeY, startX += 20, startY -= 20));
+        }
+
+        //creating row of bosses
+        homeY = 80;
+        startX = 300;
+        startY = -20;
+        for(var i = 1; i <= 4; i++){
+            let homeX = i * 40 + 195;
+            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'boss', homeX, homeY, startX, startY -= 20));
+        }
+
         gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'red'));
         gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'boss'));
 
@@ -60,16 +105,9 @@ class Game {
         console.log(gameHandler.find("player")[0].getTag());
 
 
-        this.x = gameHandler.find("player")[0].getGun()[0];
-        this.y = gameHandler.find("player")[0].getGun()[1];
-        gameHandler.addObject(new Bullet("bullet", bulletDrawOrder, this.x, this.y));
-
-        // Class for background
-
         // Class for level indicator
 
         // BOTTOM of CONSTRUCTOR
-        // Create a reset method, to restart game / clear
     }
 
     restart(){
@@ -79,137 +117,34 @@ class Game {
       this.playerScore = 0;
     }
 
+
+    //--------------------------------------------------------------------------
+    // Setup, Tick and Draw game mode decision trees
+    //--------------------------------------------------------------------------
+
     //Stuff that needs to run once when the game mode is switched
     setup(){
       if(this.gameMode == "playing"){
-        //Create the pause button
-        var pauseButton = createButton("");
-        pauseButton.position(552, 20);
-        pauseButton.parent("sketch");
-        pauseButton.addClass("pauseIcon");
-        pauseButton.mousePressed(function(){
-          game.changeState("paused");
-        });
+        this.setupPlaying();
 
       }else if(this.gameMode == "paused"){
-        //Draw in the last frame of the game
-        gameHandler.draw();
-
-        //Shade background once so the alpha doesn't grow to opaque
-        background('rgba(219,214,214, 0.35)');
-        this.needToShadeBackground = false;
-
-        //Draw red square
-        fill(178,34,34);
-        stroke("black");
-        strokeWeight(7);
-        rect(125,100,350,350);
-
-        //Paused title
-        noStroke();
-        fill("black");
-        textStyle(BOLD);
-        textSize(36);
-        text('Paused', 238, 121+34);
-
-        //Set up the buttons
-        this.makeCustomButton("Menu", "menu", "pauseButton", 199, 172);
-        this.makeCustomButton("Continue", "playing", "pauseButton", 199, 264);
-        this.makeCustomButton("Help", "help", "pauseButton", 199, 356);
+        this.setupPaused();
 
       }else if(this.gameMode == "help"){
-        //Set up the buttons
-        this.makeCustomButton("Back", this.previousMode, "helpButton", 372, 29);
-
-        let helpText = createP(this.helpString);
-        helpText.addClass("helpText");
-        helpText.parent("sketch");
-        helpText.position(51, 140);
-
+        this.setupHelp();
 
       }else if(this.gameMode == "menu"){
-        //restart the game
-        this.restart();
-
-        //Set up the buttons
-        this.makeCustomButton("Play", "playing", "menuButton", 328, 86);
-        this.makeCustomButton("Help", "help", "menuButton", 328, 178);
+        this.setupMenu();
 
       }else if(this.gameMode == "gameOver"){
-        //restart the game
-        this.restart();
-
-        //Draw in the last frame of the game
-        gameHandler.draw();
-
-        //Shade background once so the alpha doesn't grow to opaque
-        background('rgba(219,214,214, 0.35)');
-        this.needToShadeBackground = false;
-
-        //Draw red square
-        fill(178,34,34);
-        stroke("black");
-        strokeWeight(7);
-        rect(125, 65, 350, 466);
-
-        //GameOver title
-        noStroke();
-        fill("black");
-        textStyle(BOLD);
-        textSize(36);
-        text('Game Over', 202, 81+34);
-
-        //skull image
-        image(skullImage, 100, -35, 400, 400);
-
-        //rectangle
-        noFill();
-        stroke("black");
-        strokeWeight(2);
-        rect(149, 217, 300, 120, 10);
-        noStroke();
-
-        //Print score text
-        textSize(28);
-        fill("white");
-        textAlign(CENTER);
-        textStyle(NORMAL);
-        text("Score: "+this.savedScore, 195, 231, 195+20, 231+28);
-        textAlign(LEFT);
-
-        //Create text box
-        let inp = createInput();
-        inp.position(166, 278);
-        inp.addClass("nameInput");
-        inp.elt.placeholder = "Leaderboard Name";
-        inp.attribute('maxlength', '15');
-        inp.parent("sketch");
-
-        //Create the submit button
-        var pauseButton = createButton("Submit");
-        pauseButton.position(335, 280);
-        pauseButton.parent("sketch");
-        pauseButton.addClass("submitButton");
-        pauseButton.mousePressed(function(){
-          console.log("score submitted");
-          pauseButton.attribute('disabled', '');
-          inp.attribute('disabled', '');
-          myDatabase.submitScore(inp.value(), game.savedScore);
-        });
-
-
-
-        //create buttons
-        this.makeCustomButton("Menu", "menu", "pauseButton", 199, 355);
-        this.makeCustomButton("Restart", "playing", "pauseButton", 199, 436);
-
+        this.setupGameOver();
       }
 
       //Only need to do set up once
       this.setupNeeded = false;
     }
 
-    //Tick the right ticks for each gamemode
+    //Update the objects (move them, subtract health, etc)
     tick(){
       //Run setup if you need to
       if(this.setupNeeded){
@@ -218,24 +153,8 @@ class Game {
 
       //Tick the correct gamemode
       if(this.gameMode == "playing"){
-        //pressing k ends the game
-        if(keyIsDown(75)){
-          console.log("game Over");
-          game.playerLives = 0;
-        }
+        this.tickPlaying();
 
-        //if the player is out of lives end the game and stop the tick
-        if(this.playerLives == 0){
-          this.changeState("gameOver");
-          return;
-        }
-
-        //type p to increase score by 10
-        if(keyIsDown(80)){
-          game.playerScore += 10;
-        }
-
-        gameHandler.tick();
       }else if(this.gameMode == "paused"){
 
       }else if(this.gameMode == "help"){
@@ -243,86 +162,288 @@ class Game {
 
       }else if(this.gameMode == "menu"){
         this.menuHandler.tick();
+
       }else if(this.gameMode == "gameOver"){
 
       }
     }
 
-    //Draw some stuff depending on game mode
+    //Draw the objects to the screen
     draw(){
       if(this.gameMode == "playing"){
-        //draw the game objects
-        gameHandler.draw();
-
-        //Top score
-        fill(236, 210, 210);
-        textStyle(NORMAL);
-        textSize(22);
-        textAlign(CENTER);
-        text('TopScore: ' + this.topScores[0].score, 100, 20, 157+210, 20+30);
-        textAlign(LEFT);
-
-        //Your score
-        text('Score: ' + this.playerScore, 10, 20, 210, 20+30);
+        this.drawPlaying();
 
       }else if(this.gameMode == "paused"){
         //All drawing is in set up, things are paused no objects to draw
       }else if(this.gameMode == "help"){
-        //draw the little ship at the bottom
-        this.helpHandler.draw();
-
-        //Title
-        noStroke();
-        fill(220, 90, 90);
-        textStyle(BOLD);
-        textSize(64);
-        text('Help', 27, 21+64);
-
-        //dividing line
-        stroke(220, 90, 90)
-        strokeWeight(4);
-        line(42, 111, 42+280, 111);
-        noStroke();
+        this.drawHelp();
 
       }else if(this.gameMode == "menu"){
-        this.menuHandler.draw();
+        this.drawMenu();
 
-        //Title
-        noStroke();
-        fill(220, 90, 90);
-        textStyle(BOLD);
-        textSize(64);
-        text('Galaga', 35, 22+64);
-
-        //high score title
-        textSize(36);
-        let desc = textDescent() * .8;
-        text('High Scores', 195, 331+36);
-        stroke(220, 90, 90)
-        strokeWeight(2);
-        line(195, 331+42, 195+212, 331+42);
-        noStroke();
-
-        //update score text
-        var scoreText = "";
-        var player;
-        for (player of this.topScores) {
-          scoreText += player.name + ": " + player.score + "\n";
-        }
-
-        //Print score text
-        textSize(24);
-        fill("white");
-        textAlign(CENTER);
-        text(scoreText, 80, 390, 80+375, 390+170);
-        textAlign(LEFT);
-
-        //Ship image
-        image(playerImage, 70, 120, 150, 150);
       }else if(this.gameMode == "gameOver"){
-
+        //All drawing is in set up, things are over no objects to draw
       }
     }
+
+    //--------------------------------------------------------------------------
+    // Setup methods for each game state
+    //--------------------------------------------------------------------------
+    setupPlaying(){
+      //Create the pause button
+      var pauseButton = createButton("");
+      pauseButton.position(552, 20);
+      pauseButton.parent("sketch");
+      pauseButton.addClass("pauseIcon");
+      pauseButton.mousePressed(function(){
+        game.changeState("paused");
+      });
+    }
+
+    setupPaused(){
+      //Draw in the last frame of the game
+      gameHandler.draw();
+
+      //Shade background once so the alpha doesn't grow to opaque
+      background('rgba(219,214,214, 0.35)');
+      this.needToShadeBackground = false;
+
+      //Draw red square
+      fill(178,34,34);
+      stroke("black");
+      strokeWeight(7);
+      rect(125,100,350,350);
+
+      //Paused title
+      noStroke();
+      fill("black");
+      textStyle(BOLD);
+      textSize(36);
+      text('Paused', 238, 121+34);
+
+      //Set up the buttons
+      this.makeCustomButton("Menu", "menu", "pauseButton", 199, 172);
+      this.makeCustomButton("Continue", "playing", "pauseButton", 199, 264);
+      this.makeCustomButton("Help", "help", "pauseButton", 199, 356);
+    }
+
+    setupHelp(){
+      //Set up the buttons
+      this.makeCustomButton("Back", this.previousMode, "helpButton", 372, 29);
+
+      let helpText = createP(this.helpString);
+      helpText.addClass("helpText");
+      helpText.parent("sketch");
+      helpText.position(51, 115);
+    }
+
+    setupMenu(){
+      //restart the game
+      this.restart();
+
+      //Set up the buttons
+      this.makeCustomButton("Play", "playing", "menuButton", 328, 86);
+      this.makeCustomButton("Help", "help", "menuButton", 328, 178);
+    }
+
+    setupGameOver(){
+      //restart the game
+      this.restart();
+
+      //Draw in the last frame of the game
+      gameHandler.draw();
+
+      //Shade background once so the alpha doesn't grow to opaque
+      background('rgba(219,214,214, 0.35)');
+      this.needToShadeBackground = false;
+
+      //Draw red square
+      fill(178,34,34);
+      stroke("black");
+      strokeWeight(7);
+      rect(125, 65, 350, 466);
+
+      //GameOver title
+      noStroke();
+      fill("black");
+      textStyle(BOLD);
+      textSize(36);
+      text('Game Over', 202, 81+34);
+
+      //skull image
+      image(skullImage, 100, -35, 400, 400);
+
+      //rectangle
+      noFill();
+      stroke("black");
+      strokeWeight(2);
+      rect(149, 217, 300, 120, 10);
+      noStroke();
+
+      //Print score text
+      textSize(28);
+      fill("white");
+      textAlign(CENTER);
+      textStyle(NORMAL);
+      text("Score: "+this.savedScore, 195, 231, 195+20, 231+28);
+      textAlign(LEFT);
+
+      //Create text box
+      let inp = createInput();
+      inp.position(166, 278);
+      inp.addClass("nameInput");
+      inp.elt.placeholder = "Leaderboard Name";
+      inp.attribute('maxlength', '15');
+      inp.parent("sketch");
+
+      //Create the submit button
+      var pauseButton = createButton("Submit");
+      pauseButton.position(335, 280);
+      pauseButton.parent("sketch");
+      pauseButton.addClass("submitButton");
+      pauseButton.mousePressed(function(){
+        console.log("score submitted");
+        pauseButton.attribute('disabled', '');
+        inp.attribute('disabled', '');
+        myDatabase.submitScore(inp.value(), game.savedScore);
+      });
+
+      //create buttons
+      this.makeCustomButton("Menu", "menu", "pauseButton", 199, 355);
+      this.makeCustomButton("Restart", "playing", "pauseButton", 199, 436);
+    }
+
+    //--------------------------------------------------------------------------
+    // Tick methods for each game state
+    //--------------------------------------------------------------------------
+    tickPlaying(){
+      //pressing k ends the game
+      if(keyIsDown(75)){
+        console.log("game Over");
+        game.playerLives = 0;
+      }
+
+      //if the player is out of lives end the game and stop the tick
+      if(this.playerLives == 0){
+        this.changeState("gameOver");
+        return;
+      }
+
+      //type p to increase score by 10
+      if(keyIsDown(80)){
+        game.playerScore += 10;
+      }
+
+      gameHandler.tick();
+      this.collision();
+
+
+      var allResting = true;
+
+      for (this.tempObject of gameHandler.find('enemy')) {
+          if (!(this.tempObject.getResting())) {
+              allResting = false;
+              console.log("Resting is false");
+          }
+        }
+
+      if (allResting) {
+          console.log("Calling enemy flight");
+          this.flightEnemy();
+      }
+
+
+
+      //deletes bullet when it is out of screen
+      for(this.tempObject of gameHandler.find('bullet')) {
+          if (this.tempObject.outOfScreen()) {
+              this.tempObject.delete();
+          }
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    // Draw methods for each game state
+    //--------------------------------------------------------------------------
+
+    drawPlaying(){
+      //draw the game objects
+      gameHandler.draw();
+      gameHandler.tick();
+
+      //Top score
+      fill(236, 210, 210);
+      textStyle(NORMAL);
+      textSize(22);
+      textAlign(CENTER);
+      text('TopScore: ' + this.topScores[0].score, 100, 20, 157+210, 20+30);
+      textAlign(LEFT);
+
+      //Your score
+      text('Score: ' + this.playerScore, 10, 20, 210, 20+30);
+
+      // Check to see that all the enemies are resting
+        // If they are call the flight method
+    }
+
+    drawHelp(){
+      //draw the little ship at the bottom
+      this.helpHandler.draw();
+
+      //Title
+      noStroke();
+      fill(220, 90, 90);
+      textStyle(BOLD);
+      textSize(64);
+      text('Help', 27, 21+64);
+
+      //dividing line
+      stroke(220, 90, 90)
+      strokeWeight(4);
+      line(42, 111, 42+280, 111);
+      noStroke();
+    }
+
+    drawMenu(){
+      this.menuHandler.draw();
+
+      //Title
+      noStroke();
+      fill(220, 90, 90);
+      textStyle(BOLD);
+      textSize(64);
+      text('Galaga', 35, 22+64);
+
+      //high score title
+      textSize(36);
+      let desc = textDescent() * .8;
+      text('High Scores', 195, 331+36);
+      stroke(220, 90, 90)
+      strokeWeight(2);
+      line(195, 331+42, 195+212, 331+42);
+      noStroke();
+
+      //update score text
+      var scoreText = "";
+      var player;
+      for (player of this.topScores) {
+        scoreText += player.name + ": " + player.score + "\n";
+      }
+
+      //Print score text
+      textSize(24);
+      fill("white");
+      textAlign(CENTER);
+      text(scoreText, 80, 390, 80+375, 390+170);
+      textAlign(LEFT);
+
+      //Ship image
+      image(playerImage, 70, 120, 150, 150);
+    }
+
+    //--------------------------------------------------------------------------
+    // UI helper methods
+    //--------------------------------------------------------------------------
 
     //Helper function since all our buttons are so similar
     makeCustomButton(text, newState, customClass, x, y){
@@ -343,6 +464,86 @@ class Game {
       removeElements();
     }
 
-    // addPoints(pointTotal)
+    //--------------------------------------------------------------------------
+    // End of UI code
+    //--------------------------------------------------------------------------
+
+    // Pick enemy to fly down
+    chooseEnemyFlight() {
+        var enemyFlight = gameHandler.find("enemy");
+
+        let first = Math.floor(Math.random() * 21);
+        let second = Math.floor(Math.random() * 21);
+        while (first === second) {
+            second = Math.floor(Math.random() * 21);
+        }
+        let third = Math.floor(Math.random() * 21);
+        while (first === third || second === third) {
+            third = Math.floor(Math.random() * 21);
+        }
+        let firstEnemy = enemyFlight[first];
+        let secondEnemy = enemyFlight[second];
+        let thirdEnemy = enemyFlight[third];
+
+        return [firstEnemy, secondEnemy, thirdEnemy];
+    }
+
+    flightEnemy() {
+        let enemiesChoosen = this.chooseEnemyFlight();
+        enemiesChoosen[0].setResting(false);
+        enemiesChoosen[0].setChoosen(true);
+        enemiesChoosen[1].setResting(false);
+        enemiesChoosen[1].setChoosen(true);
+        enemiesChoosen[2].setResting(false);
+        enemiesChoosen[2].setChoosen(true);
+
+    }
+
+
+    // Collisions for if either the player or enemy is hit
+    collision() {
+        var bullets = gameHandler.find("bullet");
+        var enemies = gameHandler.find("enemy");
+        var player = gameHandler.find("player");
+
+        // Iterate through enemies and player, if either of the coordinates overlap with
+        let i, j;
+        for (i = 0; i < bullets.length; ++i ) {
+            for (j = 0; j < enemies.length; ++j) {
+                // See if the bullet overlaps with enemy location
+                if (bullets[i].getLeftX() > enemies[j].getLeftVertex()
+                        && bullets[i].getTopY() < enemies[j].getBottomY()
+                        && bullets[i].getBottomY() > enemies[j].getTopY()
+                        && bullets[i].getRightX() < enemies[j].getRightVertex()) {
+
+                    // Set the status of enemy to false
+                    enemies[j].setAlive(false);
+                    console.log("Bullet hit");
+                    this.addPoints(10);
+                    bullets[i].delete();
+
+                }
+            }
+        }
+
+        for (i = 0; i < enemies.length; ++i) {
+            if (player[0].getLeftVertex() <= enemies[i].getMiddleX() &&
+                    player[0].getRightVertex() >= enemies[i].getMiddleX() &&
+                    player[0].getTopY() <= enemies[i].getBottomY() &&
+                        player[0].getBottomY() >= enemies[i].getTopY()) {
+
+
+                enemies[i].setAlive(false);
+                console.log("Enemy hit user");
+                this.playerLives -= 1;
+
+            }
+        }
+    }
+
+
+    addPoints(points) {
+        this.playerScore += points;
+    }
     // Have points counter print to certain point on screen (in draw method)
 }

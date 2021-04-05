@@ -53,7 +53,7 @@ class GameObject {
    draw() {
      // TODO more complex draw method that draws each layer one at a time
      for (this.tempObject of this.objectList) {
-       this.tempObject.draw();
+         this.tempObject.draw();
      }
    }
 
