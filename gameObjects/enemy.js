@@ -5,14 +5,11 @@ class Enemy extends GameObject {
     // Need function for getting shot (overlap with bullets)
 
     constructor(tag, drawOrder, _type, _homeX, _homeY, _startX, _startY) {
-        // Need player lives count
+
         super(tag, drawOrder);
-        this.triangle1X = _startX;
-        this.triangle1Y = _startY;
-        this.triangle2X = this.triangle1X - 10;
-        this.triangle2Y = this.triangle1Y - 20;
-        this.triangle3X = this.triangle1X + 10 ;
-        this.triangle3Y = this.triangle1Y - 20;
+        this.shipX = _startX
+        this.shipY = _startY
+        this.size = 40;
         this.speed = 5;
         this.type = _type;
         this.alive = true;
@@ -25,229 +22,207 @@ class Enemy extends GameObject {
         this.startY = _startY;
         this.zig = 1;
         this.zag = 1;
+        this.lives = 1;
+        this.exploding = false;
+        this.explosionDuration = 150;
+        this.explosionFrameRate = 15;
+        this.framesSinceExplosion = 0;
+        this.explosionFrame = 0;
 
+        if (_type === "boss") {
+            this.lives = 2;
+        }
 
+        //Create a sprite type which tracks which animations to use for this enemy
+        this.spriteType;
+        if(this.type === "blueOne" || this.type === "blueTwo"){
+          this.spriteType = "blue";
+        }else if(this.type === "redOne" || this.type === "redTwo"){
+          this.spriteType = "red";
+        }else if(this.type === "boss"){
+          this.spriteType = "bossHealthy";
+        }
 
+        this.spriteFrame = 0;
+        this.spriteFrameDuration = 50;
+
+        this.shipRotation = 180;
     }
 
     tick() {
+      if(!this.exploding){
+
+        if (this.lives === 0) {
+            this.exploding = true;
+        }
+
+        //If the boss gets hit use the hurt sprite animation
+        if(this.lives == 1 && this.type == "boss"){
+          this.spriteType = "bossHurt";
+        }
+
+        if (this.lives == 2 && this.type == "boss") {
+            this.spriteType = "bossHealthy";
+        }
+
+        let enemyLocation = [];
 
         //how we get the enemies to leave home
-        if (this.triangle1X == this.homeX && this.triangle1Y == this.homeY) {
+        if (this.shipX === this.homeX && this.shipY === this.homeY) {
             this.flying = false;
             this.resting = true;
         }
 
+        if (this.choosen){
+            this.resting = false;
+        }
+
         //enemies return home
         if (this.flying === true && this.resting === false) {
-            if (this.triangle1X != this.homeX && this.triangle1X > this.homeX) {
 
-                this.triangle1X -= 1;
-                this.triangle2X -= 1;
-                this.triangle3X -= 1;
+            enemyLocation = returnHome(this.shipX, this.shipY, this.homeX, this.homeY);
 
-            }
-            if (this.triangle1Y != this.homeY && this.triangle1Y > this.homeY) {
-                this.triangle1Y -= 1;
-                this.triangle2Y -= 1;
-                this.triangle3Y -= 1;
-            }
+            // set the new X for enemy location
+            this.shipX = enemyLocation[0];
 
+            // set the new Y for enemy location
+            this.shipY = enemyLocation[1];
 
-            if (this.triangle1X != this.homeX && this.triangle1X < this.homeX) {
-
-                this.triangle1X += 1;
-                this.triangle2X += 1;
-                this.triangle3X += 1;
-
-            }
-            if (this.triangle1Y != this.homeY && this.triangle1Y < this.homeY) {
-                this.triangle1Y += 1;
-                this.triangle2Y += 1;
-                this.triangle3Y += 1;
-            }
-
-            this.choosen = false;
-
+            // set the rotation
+            this.shipRotation = enemyLocation[2];
         }
 
         //Zig zag flight pattern
 
-        if (this.flying === false && this.resting === true && this.choosen === true) {
-            var player = gameHandler.find("player");
-            let playerX = player[0].getLeftVertex();
-            let playerY = player[0].getBottomY();
+        if (this.flying === false && this.choosen === true && this.shipY < 400) {
+            let player = gameHandler.find("player");
+            let playerX = player[0].getX();
+            let playerY = player[0].getY();
 
             // get distance so attack can slowly focus in on player
             let playerDistance = playerY - this.homeY;
             playerDistance = playerDistance/3;
 
-            //if the player is to the right of the ship and far away get the player inside the bounds
-            if (this.triangle1X > playerX + 60 && this.triangle1Y <= playerY - (2 * playerDistance)){
+            enemyLocation = zigZagFlight(this.zig, this.zag, playerX, playerY, playerDistance,
+                this.shipX, this.shipY);
 
-                this.triangle1X -= 1;
-                this.triangle2X -= 1;
-                this.triangle3X -= 1;
+            // set the new X for enemy location
+            this.shipX = enemyLocation[0];
 
-            }
-
-            //if the player is left of the ship and far away get the player within the bounds
-            if (this.triangle1X < playerX - 60 && this.triangle1Y <= playerY - (2 * playerDistance)){
-
-                this.triangle1X += 1;
-                this.triangle2X += 1;
-                this.triangle3X += 1;
-
-            }
-
-            //if the player is to the right of the ship and medium away get the player inside the bounds
-            if (this.triangle1X > playerX + 40 && this.triangle1Y <= playerY - playerDistance && this.triangle1Y > playerY - (2 * playerDistance)){
-
-                this.triangle1X -= 1;
-                this.triangle2X -= 1;
-                this.triangle3X -= 1;
-
-            }
-
-            //if the player is left of the ship and medium away get the player within the bounds
-            if (this.triangle1X < playerX - 40 && this.triangle1Y <= playerY - playerDistance && this.triangle1Y > playerY - (2 * playerDistance)) {
-
-                this.triangle1X += 1;
-                this.triangle2X += 1;
-                this.triangle3X += 1;
-
-            }
-
-            //if the player is right of the ship and close get the player within the bounds
-            if (this.triangle1X > playerX + 20 && this.triangle1Y <= playerY && this.triangle1Y > playerY - playerDistance){
-
-                this.triangle1X -= 1;
-                this.triangle2X -= 1;
-                this.triangle3X -= 1;
-
-            }
-
-            //if the player is left of the ship and close get the player within the bounds
-            if (this.triangle1X < playerX - 20 && this.triangle1Y <= playerY && this.triangle1Y > playerY - playerDistance) {
-
-                this.triangle1X += 1;
-                this.triangle2X += 1;
-                this.triangle3X += 1;
-
-            }
-
-            //once inside the bounds we want the player to bounce back and forth
-            if(this.triangle1Y <= playerY - (2 * playerDistance) && this.triangle1X <= playerX + 60
-                && this.triangle1X >= playerX - 60){
+            // set the new Y for enemy location
+            this.shipY = enemyLocation[1];
 
 
-                if(this.triangle1X === playerX + 60){
-                    this.zig = -this.zig;
-                }
-                if(this.triangle1X === playerX - 60){
-                    this.zig = -this.zig;
-                }
+            // set the new zig and zag
+            this.zig = enemyLocation[2];
+            this.zag = enemyLocation[3];
 
-                this.triangle1X += this.zig;
-                this.triangle2X += this.zig;
-                this.triangle3X += this.zig;
+            // set the new rotation
+            this.shipRotation = enemyLocation[4];
 
-                this.triangle1Y += this.zag;
-                this.triangle2Y += this.zag;
-                this.triangle3Y += this.zag;
-            }
-
-            if(this.triangle1Y <= playerY - playerDistance && this.triangle1Y > playerY - (2 * playerDistance)
-                && this.triangle1X <= playerX + 40 && this.triangle1X >= playerX - 40){
-
-
-                if(this.triangle1X === playerX + 40){
-                    this.zig = -this.zig;
-                }
-                if(this.triangle1X === playerX - 40){
-                    this.zig = -this.zig;
-                }
-
-                this.triangle1X += this.zig;
-                this.triangle2X += this.zig;
-                this.triangle3X += this.zig;
-
-                this.triangle1Y += this.zag;
-                this.triangle2Y += this.zag;
-                this.triangle3Y += this.zag;
-            }
-
-            if(this.triangle1Y < playerY && this.triangle1Y > playerY - playerDistance
-                && this.triangle1X <= playerX + 20 && this.triangle1X >= playerX - 20){
-
-
-                if(this.triangle1X == playerX + 20){
-                    this.zig = -this.zig;
-                }
-                if(this.triangle1X === playerX - 20){
-                    this.zig = -this.zig;
-                }
-
-                this.triangle1X += this.zig;
-                this.triangle2X += this.zig;
-                this.triangle3X += this.zig;
-
-                this.triangle1Y += this.zag;
-                this.triangle2Y += this.zag;
-                this.triangle3Y += this.zag;
-            }
-
-            if(this.triangle1Y >= playerY && this.alive === true){
-                this.resting = false;
+            if(this.shipY >= playerY && this.alive === true){
                 this.flying = true;
+                this.resting = false;
+            }
+        }
+
+        //set them to resting rotation once in resting position
+        if (this.resting && !this.flying){
+            this.shipRotation = 180;
+        }
+
+        // Enemies shoot if they are between pixels 250 (bottom of enemy line) and
+        // 400 (when they go into dive bomb)
+        if (this.shipY >= 250 && this.shipY <= 390 && this.choosen === true) {
+            // Generate a random number between 1 and 100
+            var number = Math.floor(Math.random() * 100);
+            if (number === 50) {
+                // If the number is 50, fire a bullet
+                gameHandler.addObject(new Bullet('bullet', "enemy", 20, (this.shipX + 20), (this.shipY + 20)));
             }
 
         }
 
-        if (this.triangle1X === this.homeX && this.triangle1Y === this.homeY) {
-            this.resting = true;
+        // Once the enemy gets to 400 pixels down the screen, go into dive bomb
+        if (this.flying === false && this.choosen === true && this.shipY >= 400) {
+            enemyLocation = diveBomb(this.shipY, level.getShipSpeed());
+            // set the new Y's for enemy location
+            this.shipY = enemyLocation[0];
+            this.shipRotation = enemyLocation[1];
         }
 
+        // Once the enemy has left the screen, reposition them at the top
+        if (this.choosen === true && this.flying === false && this.shipY >= 630) {
+            enemyLocation = moveToTop(this.shipX,
+                this.shipY);
 
-        // If the enemy is hit, move the enemy to the starting point
-        if (this.alive === false) {
-            this.triangle1X = this.startX;
-            this.triangle1Y = this.startY;
-            this.triangle2X = this.triangle1X - 10;
-            this.triangle2Y = this.triangle1Y - 20;
-            this.triangle3X = this.triangle1X + 10 ;
-            this.triangle3Y = this.triangle1Y - 20;
+            // set the new X's for enemy location
+            this.shipX = enemyLocation[0];
+
+            // set the new Y's for enemy location
+            this.shipY = enemyLocation[1];
+        }
+
+      }else{
+          //The ship is exploding
+          this.framesSinceExplosion ++;
+          if(this.framesSinceExplosion > this.explosionDuration){
+            //The ship has finished exploding delete the ship and make a new one
+            this.exploding = false;
+            this.choosen = false;
+            this.alive = false;
+
+
+            // If the enemy is hit, move the enemy to the starting point
+            this.shipX = this.startX;
+            this.shipY = this.startY;
             this.resting = true;
             this.flying = false;
-        }
+          }
+      }
     }
+
 
 
     draw() {
-        if (this.type == 'blue') {
-            fill('blue');
-        }
-        if (this.type == 'red') {
-            fill('red');
-        }
-        if (this.type == 'boss') {
-            fill('gold')
+        // Handling collisions with bullets
+        if(!this.exploding && this.alive){
+          //Find current sprite frames alternate image every spriteFrameDuration
+          //amount of frames
+          this.spriteFrame = Math.floor(frameCount/this.spriteFrameDuration) % 2
+
+          if(this.shipRotation != 0){
+            //The ship isn't straight up and down rotation needed
+            this.rotate_and_draw_image(enemyImages[this.spriteType][this.spriteFrame],
+                this.shipX, this.shipY, this.size, this.size, this.shipRotation);
+
+          }else{
+            //draw the enemy straight up and down
+            image(enemyImages[this.spriteType][this.spriteFrame], this.shipX,
+                this.shipY, this.size, this.size);
+          }
+        }else if(this.exploding){
+          //draw the right sprite frame based on time since explosion
+          if(!(this.framesSinceExplosion > this.explosionFrameRate * 4)){
+            this.explosionFrame = Math.floor(this.framesSinceExplosion/this.explosionFrameRate);
+            image(enemyExplosionImages[this.explosionFrame], this.shipX-(this.size*.5), this.shipY-(this.size*.5),
+              this.size*2, this.size*2);
+          }
+          //draw nothing if it is long enough after explosion
         }
 
-        // Handling collisions with bullets
-        if (this.alive === true) {
-            //draw the enemy
-            noStroke();
-            triangle(this.triangle1X, this.triangle1Y, this.triangle2X, this.triangle2Y, this.triangle3X, this.triangle3Y,);
-        }
     }
 
-    //returns the gun location of enemy
-    getGun() {
-        this.coordinate = [];
-        this.coordinate.push(this.triangle1X);
-        this.coordinate.push(this.triangle1Y);
-        return this.coordinate;
+    //Yanked right off the internet from here (with some minor edits to fit our needs)
+    //https://stackoverflow.com/questions/45388765/how-to-rotate-image-in-p5-js
+    rotate_and_draw_image(img, img_x, img_y, img_width, img_height, img_angle){
+        imageMode(CENTER);
+        translate(img_x+img_width/2, img_y+img_width/2);
+        rotate(PI/180*img_angle);
+        image(img, 0, 0, img_width, img_height);
+        rotate(-PI / 180 * img_angle);
+        translate(-(img_x+img_width/2), -(img_y+img_width/2));
+        imageMode(CORNER);
     }
 
     //returns the home position of enemy
@@ -268,6 +243,34 @@ class Enemy extends GameObject {
         this.choosen = choice;
     }
 
+    setStartX(x) {
+        this.startX = x;
+    }
+
+    setStartY(y) {
+        this.startY = y;
+    }
+
+    setSpeed(s) {
+        this.speed += s;
+    }
+
+    setLives(live) {
+        this.lives = live;
+    }
+
+    setSprite(sprite) {
+        this.spriteType = sprite;
+    }
+
+    lostLife() {
+        this.lives -= 1;
+    }
+
+    getChoosen(){
+        return this.choosen;
+    }
+
     getAlive() {
         return this.alive;
     }
@@ -280,25 +283,19 @@ class Enemy extends GameObject {
         return this.resting;
     }
 
-
-    getLeftVertex() {
-        return this.triangle2X;
+    getSize() {
+        return this.size;
     }
 
-    getRightVertex() {
-        return this.triangle3X;
+    getY() {
+        return this.shipY;
     }
 
-    getTopY() {
-        return this.triangle2Y;
+    getX() {
+        return this.shipX;
     }
-
-    getBottomY() {
-        return this.triangle1Y;
-    }
-
-    getMiddleX() {
-        return this.triangle1X;
+    getExploding() {
+        return this.exploding;
     }
 
 }

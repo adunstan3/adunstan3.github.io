@@ -4,16 +4,23 @@ class Bullet extends GameObject {
 
     // Need function for getting shot (overlap with bullets)
 
-    constructor(tag, drawOrder, _x, _y) {
+    constructor(tag, _type, drawOrder, _x, _y) {
         super(tag, drawOrder);
         this.squareX = _x, this.squareY = _y;
         this.squareSize = 5;
         this.speed = 2.5;
+        this.type = _type;
     }
 
     tick() {
-        //updates the object
-        this.squareY -= this.speed;
+
+        if (this.type === "player") {
+            //updates the object
+            this.squareY -= this.speed;
+        }
+        if (this.type === "enemy") {
+            this.squareY += this.speed;
+        }
     }
 
     draw() {
@@ -47,4 +54,11 @@ class Bullet extends GameObject {
         return this.squareY + this.squareSize;
     }
 
+    getType() {
+        return this.type;
+    }
+
+    updateSpeed(speed) {
+        this.speed += speed;
+    }
 }

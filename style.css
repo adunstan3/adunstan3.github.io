@@ -61,7 +61,7 @@ https://css-tricks.com/making-pure-css-playpause-button/
 }
 
 .submitButton:disabled, .nameInput:disabled{
-  background-color: rgb(170, 170, 170);
+  background-color: rgb(97, 186, 113);
 }
 
 .submitButton:hover:disabled{

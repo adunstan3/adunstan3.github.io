@@ -7,101 +7,120 @@ class Player extends GameObject {
     constructor(tag, drawOrder) {
         super(tag, drawOrder);
 
-        // Need player lives count
-        this.lives = 3;
         this.shipSize = 40;
-        this.triangle1X = 300; this.triangle1Y = 510; this.triangle2X= 290 ; this.triangle2Y = 530;
-        this.triangle3X = 210; this.triangle3Y = 530;
-        this.speed = 2.5;
+        this.shipX = 280
+        this.shipY = 510
+        this.gunX = 300
+        this.speed = 2;
+        this.fireable = true;
+        this.firingDuration = 50;
+        this.framesSinceFiring = 0
+        this.exploding = false;
+        this.explosionDuration = 150;
+        this.explosionFrameRate = 20;
+        this.framesSinceExplosion = 0;
+        this.explosionFrame = 0;
 
         //How close the player can get to the edge
         this.edgeBuffer = 15;
+
+        this.space = false;
+        this.spaceCount = true;
     }
 
     tick() {
         //updates the object
 
+        if (!this.exploding) {
+            //You can only move and fire an operational ship
 
-        // allows you to move the player left (left arrow and a)
-        if (keyIsDown(LEFT_ARROW) || keyIsDown(65)) {
-            this.triangle1X -= this.speed;
-            this.triangle2X -= this.speed;
-            this.triangle3X -= this.speed;
-        }
+            // allows you to move the player left (left arrow and a)
+            if (keyIsDown(LEFT_ARROW) || keyIsDown(65)) {
+                this.shipX -= this.speed;
+                this.gunX -= this.speed;
+            }
 
-        //allows you to move the player right (right arrow and d)
-        if (keyIsDown(RIGHT_ARROW) || keyIsDown(68)) {
-            this.triangle1X += this.speed;
-            this.triangle2X += this.speed;
-            this.triangle3X += this.speed;
-        }
+            //allows you to move the player right (right arrow and d)
+            if (keyIsDown(RIGHT_ARROW) || keyIsDown(68)) {
+                this.shipX += this.speed;
+                this.gunX += this.speed;
+            }
 
-        //keep ship from moving off the left side of screen
-        if (this.triangle1X < 0 + this.edgeBuffer) {
-            this.triangle1X += this.speed;
-            this.triangle2X += this.speed;
-            this.triangle3X += this.speed;
-        }
+            //keep ship from moving off the left side of screen
+            if (this.shipX < 0 + this.edgeBuffer) {
+                this.shipX += this.speed;
+                this.gunX += this.speed;
+            }
 
-        //keep ship from moving off the right side of screen
+            //keep ship from moving off the right side of screen
 
-        if (this.triangle1X + this.shipSize > width - this.edgeBuffer) {
-            this.triangle1X -= this.speed;
-            this.triangle2X -= this.speed;
-            this.triangle3X -= this.speed;
-        }
+            if (this.shipX + this.shipSize > width - this.edgeBuffer) {
+                this.shipX -= this.speed;
+                this.gunX -= this.speed;
+            }
 
-        //allows you to fire weapon while space bar is down
-        if (keyIsDown(32)) {
-            //make sure we are able to fire
-            this.fireable = true;
-            for (const tempObject of gameHandler.find('bullet')) {
-                if (tempObject.getLocation() > 320) {
+            //allows you to fire weapon while space bar is down
+            if (keyIsDown(32) || this.space === true) {
+                //once we know we can fire WE FIRE
+                if (this.fireable == true) {
+                    gameHandler.addObject(new Bullet('bullet', 'player', bulletDrawOrder, this.gunX, this.shipY));
                     this.fireable = false;
                 }
-            }
 
-            //once we know we can fire WE FIRE
-            if (this.fireable == true) {
-                gameHandler.addObject(new Bullet('bullet', 20, gameHandler.find('player')[0].getGun()[0], gameHandler.find('player')[0].getGun()[1]));
+            }
+            if (this.fireable === false) {
+                this.framesSinceFiring++;
+                if (this.framesSinceFiring > this.firingDuration) {
+                    this.fireable = true;
+                    this.framesSinceFiring = 0;
+                }
+            }
+        }else{
+            //The ship is exploding
+            this.framesSinceExplosion ++;
+            if(this.framesSinceExplosion > this.explosionDuration){
+              //The ship has finished exploding delete the ship and make a new one
+              this.delete();
+              gameHandler.addObject(new Player("player", playerDrawOrder));
+              game.playerLives -= 1;
             }
         }
-
     }
 
     draw() {
-
-        //draw the player
-        fill('green');
-        noStroke();
-        image(playerImage, this.triangle1X - 20, this.triangle1Y, this.shipSize, this.shipSize);
-        //triangle(this.triangle1X, this.triangle1Y, this.triangle2X, this.triangle2Y, this.triangle3X, this.triangle3Y);
+        if(!this.exploding){
+          //draw the player
+          image(playerImage, this.shipX, this.shipY, this.shipSize, this.shipSize);
+        }else{
+          //draw the right sprite frame based on time since explosion
+          if(!(this.framesSinceExplosion > this.explosionFrameRate * 3)){
+            this.explosionFrame = Math.floor(this.framesSinceExplosion/this.explosionFrameRate);
+            image(explosionImages[this.explosionFrame], this.shipX-(this.shipSize*.5), this.shipY-(this.shipSize*.5),
+              this.shipSize*2, this.shipSize*2);
+          }
+          //draw nothing if it is long enough after explosion
+        }
     }
 
-    getGun(){
-        this.coordinate = [];
-        this.coordinate.push(this.triangle1X - 3);
-        this.coordinate.push(this.triangle1Y);
-        return this.coordinate;
+    kill() {
+      //Player ship has been killed
+      //Trigger explosion animation, disable movement, spawn new ship
+      this.exploding = true;
     }
 
-    getLeftVertex() {
-        return this.triangle2X;
+    getX() {
+        return this.shipX;
     }
 
-    getRightVertex() {
-        return this.triangle3X;
+    getY() {
+        return this.shipY;
     }
 
-    getTopY() {
-        return this.triangle1Y;
+    getSize() {
+        return this.shipSize;
     }
-
-    getBottomY() {
-        return this.triangle2Y;
-    }
-
-    reduceLife() {
-        this.lives -= 1;
+    getExploding(){
+        return this.exploding;
     }
 }
+

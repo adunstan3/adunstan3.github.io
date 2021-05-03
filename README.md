@@ -30,7 +30,21 @@ our progress.
 - Point system for each level (3)
 - Create the bullets for both user and computer (13)
 - Create enemy class (13)
-- Create functionality based on enemy ship
+- Create functionality based on enemy ship (13)
 - Create player class (8)
 - Create flight path function for enemy ships  (13)
 - Create simple html and css for website (5)
+
+### Sprint 2 Tasks
+- Create sprite classes that hold the orientation of enemy while its flying and implement them(21)
+- Create dive bomb enemy flight path (5)
+- Make sure once enemy is in suicide flight path that it keeps looping until it dies (8)
+- Get enemy’s in flight to shoot bullets (13)
+- Deal with player bullet collisions (5)
+- Distinguish between player bullet and enemy bullet (5)
+- Switch all our simple objects to images  (21)
+- Make game last forever (21)
+- Increase the speed of dive bomb as the levels increase (5)
+- Player lives and game level images(8)
+- Make bosses have 2 lives (8)
+

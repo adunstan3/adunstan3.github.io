@@ -1,5 +1,12 @@
 let gameHandler;
 
+//Constants for recording what layer things get drawn on
+let backgroundDrawOrder = 1;
+let starDrawOrder = 10;
+let bulletDrawOrder = 20;
+let enemyDrawOrder = 30;
+let playerDrawOrder = 40;
+
 class Game {
     constructor() {
         //For frame navigation
@@ -17,29 +24,27 @@ class Game {
 
         this.playerScore = 0;
         this.savedScore = 0;
-        this.playerLives = 4;
+        this.playerLives = 3;
+        this.allResting = false;
+        this.allDead = false;
+
+        //variables needed for level indicator at the start of each level
+        this.showLevel = 0;
+        this.showLevelDuration = 80;
 
         //help text
         let spanStart = '<span style="color: rgb(113, 229, 125)">';
         this.helpString = spanStart + 'Movement:</span> move your ship left and right with arrow keys or \'a\' and \'d\'<br><br>'+
         spanStart + 'Firing:</span> fire bullets by tapping or holding space<br><br>'+
-        spanStart + 'Points:</span> get points by killing enemies and completling levels. For testing you get points by pressing \'p\'<br><br>'+
+        spanStart + 'Points:</span> get points by killing enemies and completing levels. For testing you get points by pressing \'p\'<br><br>'+
         spanStart + 'Lives:</span> start with 3 lives, and get an extra life every 10,000 points<br><br>'+
         spanStart + 'Death:</span> you die if you are hit with a bullet or if you crash into a ship. If you are pulled by a tractor beam you have the ability to get two ships. You also die when you press \'k\' for testing<br><br>'
 
-        // Need an array enemies
-
         // Need level class instantiated here
+        level = new Levels();
 
         // Need points system
         let pointTotal = 0;
-
-        //Constants for recording what layer things get drawn on
-        let backgroundDrawOrder = 1;
-        let starDrawOrder = 10;
-        let bulletDrawOrder = 20;
-        let enemyDrawOrder = 30;
-        let playerDrawOrder = 40;
 
         gameHandler.addObject(new Background("background", backgroundDrawOrder));
         this.menuHandler.addObject(new Background("background", backgroundDrawOrder));
@@ -54,67 +59,122 @@ class Game {
 
         //creating first row of blue enemies
         let homeY = 200;
-        let startX = 620;
-        let startY = 620;
+        let startX = 700;
+        let startY = 700;
         for(var i = 1; i <= 10; i++){
-            let homeX = i * 40 + 75;
-            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'blue', homeX, homeY, startX += 20, startY += 20));
+            let homeX = i * 50 + 5;
+            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'blueOne', homeX, homeY, startX += 40, startY += 40));
         }
 
         //creating second row of blue enemies
         homeY = 240;
-        startX = -200;
-        startY = 820;
+        startX = -580;
+        startY = 1140;
         for(var i = 1; i <= 10; i++){
-            let homeX = i * 40 + 75;
-            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'blue', homeX, homeY, startX += 20, startY -= 20));
+            let homeX = i * 50 + 5;
+            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'blueTwo', homeX, homeY, startX += 40, startY -= 40));
         }
 
         //creating first row of red enemies
         homeY = 160;
-        startX = -160;
-        startY = -160;
+        startX = -540;
+        startY = -540;
         for(var i = 1; i <= 8; i++){
-            let homeX = i * 40 + 115;
-            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'red', homeX, homeY, startX += 20, startY += 20));
+            let homeX = i * 50 + 50;
+            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'redOne', homeX, homeY, startX += 40, startY += 40));
         }
 
         //creating second row of red enemies
         homeY = 120;
-        startX = 620;
-        startY = -20;
+        startX = 700;
+        startY = -140;
         for(var i = 1; i <= 8; i++){
-            let homeX = i * 40 + 115;
-            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'red', homeX, homeY, startX += 20, startY -= 20));
+            let homeX = i * 50 + 50;
+            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'redTwo', homeX, homeY, startX += 40, startY -= 40));
         }
 
         //creating row of bosses
         homeY = 80;
         startX = 300;
-        startY = -20;
+        startY = -300;
         for(var i = 1; i <= 4; i++){
-            let homeX = i * 40 + 195;
-            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'boss', homeX, homeY, startX, startY -= 20));
+            let homeX = i * 50 + 145;
+            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'boss', homeX, homeY, startX, startY -= 40));
         }
-
-        gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'red'));
-        gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'boss'));
 
         this.helpHandler.addObject(new Player("player", playerDrawOrder));
 
-        console.log(gameHandler.find("player")[0].getTag());
-
-
-        // Class for level indicator
 
         // BOTTOM of CONSTRUCTOR
     }
 
-    restart(){
-      //player info
-      this.playerLives = 4;
-      this.savedScore = this.playerScore;
-      this.playerScore = 0;
+    restart() {
+        //player info
+        this.playerLives = 3;
+        this.savedScore = this.playerScore;
+        this.playerScore = 0;
+        level.setLevel(1);
+        level.setShipSpeed(1);
+
+
+        let enemyDrawOrder = 30;
+
+        // Delete the other enemies
+        let enemies = gameHandler.find("enemy");
+        for (let tempObject of enemies) {
+            tempObject.delete();
+        }
+
+        // Delete the bullets
+        let bullets = gameHandler.find("bullet")
+        for (let tempObject of bullets) {
+            tempObject.delete();
+        }
+
+        //creating first row of blue enemies
+        let homeY = 200;
+        let startX = 700;
+        let startY = 700;
+        for(var i = 1; i <= 10; i++){
+            let homeX = i * 50 + 5;
+            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'blueOne', homeX, homeY, startX += 40, startY += 40));
+        }
+
+        //creating second row of blue enemies
+        homeY = 240;
+        startX = -580;
+        startY = 1140;
+        for(var i = 1; i <= 10; i++){
+            let homeX = i * 50 + 5;
+            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'blueTwo', homeX, homeY, startX += 40, startY -= 40));
+        }
+
+        //creating first row of red enemies
+        homeY = 160;
+        startX = -540;
+        startY = -540;
+        for(var i = 1; i <= 8; i++){
+            let homeX = i * 50 + 50;
+            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'redOne', homeX, homeY, startX += 40, startY += 40));
+        }
+
+        //creating second row of red enemies
+        homeY = 120;
+        startX = 700;
+        startY = -140;
+        for(var i = 1; i <= 8; i++){
+            let homeX = i * 50 + 50;
+            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'redTwo', homeX, homeY, startX += 40, startY -= 40));
+        }
+
+        //creating row of bosses
+        homeY = 80;
+        startX = 300;
+        startY = -300;
+        for(var i = 1; i <= 4; i++){
+            let homeX = i * 50 + 145;
+            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'boss', homeX, homeY, startX, startY -= 40));
+        }
     }
 
 
@@ -304,6 +364,7 @@ class Game {
       pauseButton.mousePressed(function(){
         console.log("score submitted");
         pauseButton.attribute('disabled', '');
+        pauseButton.html('Success!');
         inp.attribute('disabled', '');
         myDatabase.submitScore(inp.value(), game.savedScore);
       });
@@ -329,30 +390,62 @@ class Game {
         return;
       }
 
-      //type p to increase score by 10
-      if(keyIsDown(80)){
-        game.playerScore += 10;
-      }
 
       gameHandler.tick();
       this.collision();
 
-
-      var allResting = true;
-
-      for (this.tempObject of gameHandler.find('enemy')) {
-          if (!(this.tempObject.getResting())) {
-              allResting = false;
-              console.log("Resting is false");
-          }
+      let alive = false;
+      // If all the enemies have been destroyed, reset their start positions
+        for (let tempObject of gameHandler.find('enemy')) {
+            if (tempObject.getAlive()) {
+                alive = true;
+            }
+        }
+        if (!alive) {
+            this.allDead = true;
+            this.newLevelStart = true;
         }
 
-      if (allResting) {
-          console.log("Calling enemy flight");
+        if (this.allDead) {
+            this.allDead = false;
+            level.updateLevel();
+            this.resetStart();
+        }
+
+
+      this.allResting = false;
+      let restCount = 0;
+      let  aliveCount = 0;
+      for (let tempObject of gameHandler.find('enemy')) {
+          if (tempObject.getAlive()) {
+              aliveCount += 1;
+              if (tempObject.getResting()) {
+                  restCount += 1;
+              }
+          }
+      }
+      if (restCount === aliveCount) {
+              this.allResting = true;
+      }
+
+      let numChoosen = 0;
+      for (let tempObject of gameHandler.find('enemy')) {
+          if (tempObject.getChoosen()) {
+              numChoosen += 1;
+          }
+      }
+      if (this.allResting && numChoosen === 0 && aliveCount > 2) {
+          this.allResting = false;
           this.flightEnemy();
       }
 
-
+      if (this.allResting && numChoosen === 0 && aliveCount <= 2) {
+          for (let tempObject of gameHandler.find("enemy")) {
+              if (tempObject.getAlive()) {
+                  tempObject.setChoosen(true);
+              }
+          }
+      }
 
       //deletes bullet when it is out of screen
       for(this.tempObject of gameHandler.find('bullet')) {
@@ -382,8 +475,34 @@ class Game {
       //Your score
       text('Score: ' + this.playerScore, 10, 20, 210, 20+30);
 
-      // Check to see that all the enemies are resting
-        // If they are call the flight method
+      //lives left
+      this.liveSize = 30;
+      this.liveX = 15;
+      this.liveY = 570;
+      this.liveBuffer = 40
+
+      if(this.playerLives == 3){
+          image(playerImage, this.liveX, this.liveY, this.liveSize, this.liveSize);
+          image(playerImage, this.liveX + this.liveBuffer, this.liveY, this.liveSize, this.liveSize);
+      }
+      if(this.playerLives == 2){
+          image(playerImage, this.liveX, this.liveY, this.liveSize, this.liveSize);
+      }
+
+      //level indicator
+      this.level = level.getLevel()
+      text('Level: ' + this.level , 510, 570, 100, 100);
+
+      //level start text
+      if(this.showLevel <= this.showLevelDuration){
+          text("LEVEL " + this.level, 270, 280, 200, 200)
+          this.showLevel++;
+      }
+      if(this.newLevelStart){
+          this.showLevel = 0;
+          this.newLevelStart = false;
+      }
+
     }
 
     drawHelp(){
@@ -471,31 +590,49 @@ class Game {
     // Pick enemy to fly down
     chooseEnemyFlight() {
         var enemyFlight = gameHandler.find("enemy");
+        var aliveEnemy = [];
+        for (var i = 0, l = enemyFlight.length; i < l; i++) {
+            var tempObject = enemyFlight[i];
+            if (tempObject.getAlive()) {
+                aliveEnemy.push(tempObject);
+            }
+        }
 
-        let first = Math.floor(Math.random() * 21);
-        let second = Math.floor(Math.random() * 21);
+        if (aliveEnemy.length < 3){
+            var firstEnemy = aliveEnemy[0];
+            var secondEnemy = aliveEnemy[1];
+            return[firstEnemy,secondEnemy];
+        }
+        var first = Math.floor(Math.random() * aliveEnemy.length);
+        var second = Math.floor(Math.random() * aliveEnemy.length);
         while (first === second) {
-            second = Math.floor(Math.random() * 21);
+            second = Math.floor(Math.random() * aliveEnemy.length);
         }
-        let third = Math.floor(Math.random() * 21);
+        var third = Math.floor(Math.random() * aliveEnemy.length);
         while (first === third || second === third) {
-            third = Math.floor(Math.random() * 21);
+            third = Math.floor(Math.random() * aliveEnemy.length);
         }
-        let firstEnemy = enemyFlight[first];
-        let secondEnemy = enemyFlight[second];
-        let thirdEnemy = enemyFlight[third];
+        var firstEnemy = aliveEnemy[first];
+        var secondEnemy = aliveEnemy[second];
+        var thirdEnemy = aliveEnemy[third];
 
+        //console.log(firstEnemy, secondEnemy, thirdEnemy);
         return [firstEnemy, secondEnemy, thirdEnemy];
     }
 
     flightEnemy() {
-        let enemiesChoosen = this.chooseEnemyFlight();
-        enemiesChoosen[0].setResting(false);
-        enemiesChoosen[0].setChoosen(true);
-        enemiesChoosen[1].setResting(false);
-        enemiesChoosen[1].setChoosen(true);
-        enemiesChoosen[2].setResting(false);
-        enemiesChoosen[2].setChoosen(true);
+        let enemiesChoosen = [];
+        enemiesChoosen = this.chooseEnemyFlight();
+
+        if(enemiesChoosen.length < 3){
+            enemiesChoosen[0].setChoosen(true);
+            enemiesChoosen[1].setChoosen(true);
+        }
+        else{
+            enemiesChoosen[0].setChoosen(true);
+            enemiesChoosen[1].setChoosen(true);
+            enemiesChoosen[2].setChoosen(true);
+        }
 
     }
 
@@ -511,39 +648,172 @@ class Game {
         for (i = 0; i < bullets.length; ++i ) {
             for (j = 0; j < enemies.length; ++j) {
                 // See if the bullet overlaps with enemy location
-                if (bullets[i].getLeftX() > enemies[j].getLeftVertex()
-                        && bullets[i].getTopY() < enemies[j].getBottomY()
-                        && bullets[i].getBottomY() > enemies[j].getTopY()
-                        && bullets[i].getRightX() < enemies[j].getRightVertex()) {
+                if ((enemies[j].getX()  <= bullets[i].getRightX()) &&
+                    ((enemies[j].getX() + enemies[j].getSize()) >= bullets[i].getLeftX()) &&
+                    ((enemies[j].getY() + enemies[j].getSize()) >= bullets[i].getTopY()) &&
+                    (enemies[j].getY() <= bullets[i].getBottomY()) &&
+                    (bullets[i].getType() === "player") &&
+                    enemies[j].getExploding() == false){
 
                     // Set the status of enemy to false
-                    enemies[j].setAlive(false);
-                    console.log("Bullet hit");
+                    enemies[j].lostLife();
+                    //console.log("Bullet hit");
                     this.addPoints(10);
                     bullets[i].delete();
 
+                    }
                 }
             }
-        }
+        if (player[0].getExploding() == false){
+            for (i = 0; i < bullets.length; ++i) {
+                if ((player[0].getX()  <= bullets[i].getRightX()) &&
+                    ((player[0].getX() + player[0].getSize()) >= bullets[i].getLeftX()) &&
+                    ((player[0].getY() + player[0].getSize()) >= bullets[i].getTopY()) &&
+                    (player[0].getY() <= bullets[i].getBottomY())
+                    && (bullets[i].getType() === "enemy")) {
 
-        for (i = 0; i < enemies.length; ++i) {
-            if (player[0].getLeftVertex() <= enemies[i].getMiddleX() &&
-                    player[0].getRightVertex() >= enemies[i].getMiddleX() &&
-                    player[0].getTopY() <= enemies[i].getBottomY() &&
-                        player[0].getBottomY() >= enemies[i].getTopY()) {
+                    // Player hit with enemy bullet
+                    player[0].kill();
+                    console.log("Player hit by bullet");
+                    bullets[i].delete();
+                }
+            }
 
+            for (i = 0; i < enemies.length; ++i) {
+                if ((player[0].getX()  <= (enemies[i].getX() + enemies[i].getSize())) &&
+                    ((player[0].getX() + player[0].getSize()) >= enemies[i].getX()) &&
+                    ((player[0].getY() + player[0].getSize()) >= enemies[i].getY()) &&
+                    (player[0].getY() <= (enemies[i].getY() + enemies[i].getSize()))) {
 
-                enemies[i].setAlive(false);
-                console.log("Enemy hit user");
-                this.playerLives -= 1;
-
+                    enemies[i].lostLife();
+                    //console.log("Enemy hit user");
+                    player[0].kill();
+                }
             }
         }
     }
 
 
     addPoints(points) {
-        this.playerScore += points;
+        this.playerScore += (points * level.getLevel());
     }
     // Have points counter print to certain point on screen (in draw method)
+
+
+    resetStart() {
+        this.allDead = false;
+
+        let enemyDrawOrder = 30;
+
+        // Delete the other enemies
+        let enemies = gameHandler.find("enemy");
+        for (let tempObject of enemies) {
+            tempObject.delete();
+        }
+
+        // Delete the bullets
+        let bullets = gameHandler.find("bullet")
+        for (let tempObject of bullets) {
+            tempObject.delete();
+        }
+
+        // Generate 4 random numbers
+        var first = Math.floor(Math.random() * 4);
+        var second = Math.floor(Math.random() * 4);
+        while (first === second) {
+            second = Math.floor(Math.random() * 4);
+        }
+        var third = Math.floor(Math.random() * 4);
+        while (first === third || second === third) {
+            third = Math.floor(Math.random() * 4);
+        }
+        var fourth = Math.floor(Math.random() * 4);
+        while (first === fourth || second === fourth || third === fourth) {
+            fourth = Math.floor(Math.random() * 4);
+        }
+
+        // Call getStarts for new starting positions
+        var start = getStarts(first);
+        var offset = this.offsetStart(start[0], start[1]);
+        var x = start[0];
+        var y = start[1];
+
+        let homeY = 200;
+        let startX = x;
+        let startY = y;
+        for(var i = 1; i <= 10; i++){
+            let homeX = i * 50 + 5;
+            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'blueOne', homeX, homeY, startX += offset[0], startY += offset[1]));
+        }
+
+        start = getStarts(second);
+        offset = this.offsetStart(start[0], start[1]);
+        x = start[0];
+        y = start[1];
+        homeY = 240;
+        startX = x;
+        startY = y;
+        for(var i = 1; i <= 10; i++){
+            let homeX = i * 50 + 5;
+            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'blueTwo', homeX, homeY, startX += offset[0], startY += offset[1]));
+        }
+
+        start = getStarts(third);
+
+        offset = this.offsetStart(start[0], start[1]);
+        x = start[0];
+        y = start[1];
+        //creating first row of red enemies
+        homeY = 160;
+        startX = x;
+        startY = y;
+        for(var i = 1; i <= 8; i++){
+            let homeX = i * 50 + 50;
+            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'redOne', homeX, homeY, startX += offset[0], startY += offset[1]));
+        }
+
+
+        start = getStarts(fourth);
+
+
+        offset = this.offsetStart(start[0], start[1]);
+        x = start[0];
+        y = start[1];
+        homeY = 120;
+        startX = x;
+        startY = y;
+        for(var i = 1; i <= 8; i++){
+            let homeX = i * 50 + 50;
+            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'redTwo', homeX, homeY, startX += offset[0], startY += offset[1]));
+        }
+
+        homeY = 80;
+        startX = 300;
+        startY = -300;
+        for(var i = 1; i <= 4; i++){
+            let homeX = i * 50 + 145;
+            gameHandler.addObject(new Enemy("enemy", enemyDrawOrder, 'boss', homeX, homeY, startX, startY -= 40));
+        }
+
+    }
+
+    offsetStart(x, y) {
+        // Has an if else that looks at the x value and either returns a positive value
+        // or negative and this is incremented or decremented (if negative) in the for loops
+        // of each tempObject when the tempObject.setStartX()
+
+        // If x is 640 and y is 640, return x = 40, y = 40
+        if (x === 700 && y === 700) {
+            return [40, 40];
+        } else if (x === -580 && y === 1140) {
+            // If x is --540 and y is 1100 return x = 20, y = -20
+            return [40, -40];
+        } else if (x === -540 && y === -540) {
+            // If x is -160 and y is -160, return x = 20, y = 20
+            return [40, 40];
+        } else if (x === 700 && y === -140) {
+            // If x is 620 and y is -20, return x = 20, y = -20
+            return [40, -40];
+        }
+    }
 }
